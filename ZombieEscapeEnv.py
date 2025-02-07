@@ -19,14 +19,13 @@ class ZombieEscapeEnv(gym.Env):
         super(ZombieEscapeEnv, self).__init__()
 
         self.grid_size = size
-        r_map = self.generate_random_map()
-        self.r_map = r_map = np.asarray(r_map, dtype="c")
-        self.nrow, self.ncol = nrow, ncol = r_map.shape
+        self.r_map = self.generate_random_map()
+        self.nrow, self.ncol = nrow, ncol = self.r_map.shape
 
         nA = 4  # actions
         nS = nrow * ncol  # states
 
-        self.initial_state_distrib = np.array(r_map == b"S").astype("float64").ravel()
+        self.initial_state_distrib = np.array(self.r_map == "S").astype("float64").ravel()
         self.initial_state_distrib /= self.initial_state_distrib.sum()
 
         # Create tuples inside the dictionary for each cell, to store information like this:
@@ -54,14 +53,14 @@ class ZombieEscapeEnv(gym.Env):
         def update_probability_matrix(row, col, action):
             new_row, new_col = inc(row, col, action)
             new_state = to_s(new_row, new_col)
-            new_letter = r_map[new_row, new_col]
-            terminated = bytes(new_letter) in b"CD"
+            new_letter = self.r_map[new_row, new_col]
+            terminated = new_letter in "CD"
             # decide reward
-            if new_letter == b"B":
+            if new_letter == "B":
                 reward = 1
-            elif new_letter == b"W":
+            elif new_letter == "W":
                 reward = -1
-            elif new_letter == b"D":
+            elif new_letter == "D":
                 reward = 5
             else:
                 reward = 0
@@ -75,9 +74,9 @@ class ZombieEscapeEnv(gym.Env):
                 s = to_s(row, col)
                 for a in range(4):
                     li = self.P[s][a]
-                    letter = r_map[row, col]
+                    letter = self.r_map[row, col]
                     # if current state is "C" or "D", game over
-                    if letter in b"CD":
+                    if letter in "CD":
                         li.append((1.0, s, 0, True))
                     else:
                         # for other state, for each action, the probability of going in the right direction
@@ -113,7 +112,7 @@ class ZombieEscapeEnv(gym.Env):
 
     def generate_random_map(
             self, size: int = 8, seed: Optional[int] = None
-    ) -> List[str]:
+    ) -> np.array:
         """Generates a random valid map (one that has a path from start to Dave's house)
 
         Args:
@@ -137,7 +136,7 @@ class ZombieEscapeEnv(gym.Env):
             board[0][0] = "S"
             board[-1][-1] = "D"
             valid = self.is_valid(board, size)
-        return ["".join(x) for x in board]
+        return board
 
     def step(self, a):
         transitions = self.P[self.s][a]
@@ -164,9 +163,9 @@ class ZombieEscapeEnv(gym.Env):
 
         agent_row, agent_col = int(self.s) // 8, int(self.s) % 8
         r_map_copy = self.r_map.copy()
-        r_map_copy[agent_row, agent_col] = b'Z'  # Place agent at the specified position
+        r_map_copy[agent_row, agent_col] = 'Z'  # Place agent at the specified position
         for row in r_map_copy:
-            print("".join(row.decode() for row in row))
+            print("".join(row for row in row))
         print("")
 
     def is_terminal(self):
@@ -174,7 +173,7 @@ class ZombieEscapeEnv(gym.Env):
         agent_row, agent_col = int(self.s) // 8, int(self.s) % 8
         r_map_copy = self.r_map.copy()
         letter = r_map_copy[agent_row, agent_col]
-        if letter in b'CD':
+        if letter in 'CD':
             return True
         return False
 
