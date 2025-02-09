@@ -1,6 +1,7 @@
 from enum import Enum
 import numpy as np
 import random
+import pygame
 import gymnasium as gym
 from gymnasium import spaces
 from gymnasium.utils import seeding
@@ -17,8 +18,42 @@ class ZombieEscapeEnv(gym.Env):
 
     def __init__(self, render_mode=None, size=8):
         super(ZombieEscapeEnv, self).__init__()
-
+        #store grid size
         self.grid_size = size
+        #PYGAME INITIALIZATIONS
+        #only load this if needed
+        if render_mode == 'human':
+            self.window_size = 512  # The size of the PyGame window
+            self.brain_img = pygame.image.load("./img/brain.jpeg")  # Brain
+            self.grass_img = pygame.image.load("./img/grass.jpeg")  # grass
+            self.spikeweed_img = pygame.image.load("./img/spikeweed.jpeg")  # spikeweed
+            self.plant_img = pygame.image.load("./img/plant.jpeg")  # plant
+            self.zombie_img = pygame.image.load("./img/zombie.jpeg")  # zombie
+            self.house_img = pygame.image.load("./img/house.png")  # house
+
+            #Resize images to fit grid size
+            self.cell_size = self.window_size // self.grid_size
+            self.brain_img = pygame.transform.scale(self.brain_img, (self.cell_size, self.cell_size))
+            self.grass_img = pygame.transform.scale(self.grass_img, (self.cell_size, self.cell_size))
+            self.spikeweed_img = pygame.transform.scale(self.spikeweed_img, (self.cell_size, self.cell_size))
+            self.plant_img = pygame.transform.scale(self.plant_img, (self.cell_size, self.cell_size))
+            self.zombie_img = pygame.transform.scale(self.zombie_img, (self.cell_size, self.cell_size))
+            self.house_img = pygame.transform.scale(self.house_img, (self.cell_size, self.cell_size))
+        
+        assert render_mode is None or render_mode in self.metadata["render_modes"]
+        self.render_mode = render_mode
+
+        """
+        If human-rendering is used, `self.window` will be a reference
+        to the window that we draw to. `self.clock` will be a clock that is used
+        to ensure that the environment is rendered at the correct framerate in
+        human-mode. They will remain `None` until human-mode is used for the
+        first time.
+        """
+        self.window = None
+        self.clock = None
+
+        #ACTUAL GAME INITIALIZATIONS
         self.r_map = self.generate_random_map()
         self.nrow, self.ncol = nrow, ncol = self.r_map.shape
 
@@ -148,29 +183,107 @@ class ZombieEscapeEnv(gym.Env):
 
         # truncation=False as the time limit is handled by the `TimeLimit` wrapper added during `make`
         return int(s), r, t, False, {"prob": p}
-
+    def _get_agent_location(self):
+        #convert state to row, column
+        return self.s // self.grid_size, self.s % self.grid_size
+    
     def reset(self, *, seed: Optional[int] = None, options: Optional[dict] = None, ):
         super().reset(seed=seed)
         self.s = categorical_sample(self.initial_state_distrib, self.np_random)
         self.lastaction = None
+
+        if self.render_mode == "human":
+            self._render_frame()
+
         return int(self.s), {"prob": 1}
 
         # Initialize the state
         # self.state = self.get_state()
 
+    def _render_frame(self):
+        if self.window is None and self.render_mode == "human":
+            pygame.init()
+            pygame.display.init()
+            self.window = pygame.display.set_mode((self.window_size, self.window_size))
+        if self.clock is None and self.render_mode == "human":
+            self.clock = pygame.time.Clock()
+
+        canvas = pygame.Surface((self.window_size, self.window_size))
+        canvas.fill((255, 255, 255))
+        pix_square_size = (
+            self.window_size / self.grid_size
+        )  # The size of a single grid square in pixels
+
+        # First we draw the house
+        target_x, target_y = (self.grid_size - 1, self.grid_size - 1)
+        canvas.blit(self.house_img, (target_x * pix_square_size, target_y * pix_square_size))
+
+        #Draw the rest of the objects
+        for row in range(self.r_map.shape[0]):
+            for col in range(self.r_map.shape[1]):
+                letter = self.r_map[row, col]
+                match letter:
+                    case 'B':
+                        canvas.blit(self.brain_img, (row * pix_square_size, col * pix_square_size))
+                    case 'L':
+                        canvas.blit(self.grass_img, (row * pix_square_size, col * pix_square_size))
+                    case 'C':
+                        canvas.blit(self.plant_img, (row * pix_square_size, col * pix_square_size))
+                    case 'W':
+                        canvas.blit(self.spikeweed_img, (row * pix_square_size, col * pix_square_size))
+       
+        # Now we draw the agent
+        agent_x, agent_y = self._get_agent_location()
+        canvas.blit(self.zombie_img, (agent_x * pix_square_size, agent_y * pix_square_size))
+
+        # Finally, add some gridlines
+        for x in range(self.grid_size + 1):
+            pygame.draw.line(
+                canvas,
+                0,
+                (0, pix_square_size * x),
+                (self.window_size, pix_square_size * x),
+                width=3,
+            )
+            pygame.draw.line(
+                canvas,
+                0,
+                (pix_square_size * x, 0),
+                (pix_square_size * x, self.window_size),
+                width=3,
+            )
+
+        if self.render_mode == "human":
+            # The following line copies our drawings from `canvas` to the visible window
+            self.window.blit(canvas, canvas.get_rect())
+            pygame.event.pump()
+            pygame.display.update()
+
+            # We need to ensure that human-rendering occurs at the predefined framerate.
+            # The following line will automatically add a delay to
+            # keep the framerate stable.
+            self.clock.tick(self.metadata["render_fps"])
+        else:  # rgb_array
+            return np.transpose(
+                np.array(pygame.surfarray.pixels3d(canvas)), axes=(1, 0, 2)
+            )
+        
     def render(self):
         # Print the board by placing the agent at the specified position"""
-
-        agent_row, agent_col = int(self.s) // 8, int(self.s) % 8
-        r_map_copy = self.r_map.copy()
-        r_map_copy[agent_row, agent_col] = 'Z'  # Place agent at the specified position
-        for row in r_map_copy:
-            print("".join(row for row in row))
-        print("")
+        if self.render_mode == 'human':
+            return self._render_frame()
+        
+        if self.render_mode == 'asci':
+            agent_row, agent_col = int(self.s) // self.grid_size, int(self.s) % self.grid_size
+            r_map_copy = self.r_map.copy()
+            r_map_copy[agent_row, agent_col] = 'Z'  # Place agent at the specified position
+            for row in r_map_copy:
+                print("".join(row for row in row))
+            print("")
 
     def is_terminal(self):
         # Check current state to see if it is terminal
-        agent_row, agent_col = int(self.s) // 8, int(self.s) % 8
+        agent_row, agent_col = int(self.s) // self.grid_size, int(self.s) % self.grid_size
         r_map_copy = self.r_map.copy()
         letter = r_map_copy[agent_row, agent_col]
         if letter in 'CD':
@@ -194,4 +307,6 @@ class ZombieEscapeEnv(gym.Env):
         return episode
 
     def close(self):
-        pass
+        if self.window is not None:
+            pygame.display.quit()
+            pygame.quit()
