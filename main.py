@@ -18,5 +18,6 @@ while not terminal:
     next_state, reward, terminal = env.step(action)[:3]
     env.render()
     state = next_state
+env.close()
 #episode = env.sample_episode()
 # print("Collected Episode:", episode)

@@ -293,7 +293,7 @@ class ZombieEscapeEnv(gym.Env):
             return True
         return False
 
-    def sample_episode(env, max_steps=50):
+    def sample_episode(self, env, max_steps=50):
         """Sample an episode from the environment using a random policy."""
         episode = []
         state, info = env.reset()
@@ -305,7 +305,7 @@ class ZombieEscapeEnv(gym.Env):
             episode.append((state, action, reward))
             env.render()
             state = next_state
-
+        self.close()
         print("Game over!")
         return episode
 
@@ -313,3 +313,5 @@ class ZombieEscapeEnv(gym.Env):
         if self.window is not None:
             pygame.display.quit()
             pygame.quit()
+            self.window = None
+            self.clock = None  # Reset clock too
