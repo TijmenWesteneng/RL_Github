@@ -276,7 +276,7 @@ class ZombieEscapeEnv(gym.Env):
         if self.render_mode == 'human':
             return self._render_frame()
         
-        if self.render_mode == 'asci':
+        if self.render_mode == 'ansi':
             agent_row, agent_col = int(self.s) // self.grid_size, int(self.s) % self.grid_size
             r_map_copy = self.r_map.copy()
             r_map_copy[agent_row, agent_col] = 'Z'  # Place agent at the specified position
