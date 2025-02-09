@@ -24,11 +24,11 @@ class ZombieEscapeEnv(gym.Env):
         #only load this if needed
         if render_mode == 'human':
             self.window_size = 512  # The size of the PyGame window
-            self.brain_img = pygame.image.load("./img/brain.jpeg")  # Brain
-            self.grass_img = pygame.image.load("./img/grass.jpeg")  # grass
-            self.spikeweed_img = pygame.image.load("./img/spikeweed.jpeg")  # spikeweed
-            self.plant_img = pygame.image.load("./img/plant.jpeg")  # plant
-            self.zombie_img = pygame.image.load("./img/zombie.jpeg")  # zombie
+            self.brain_img = pygame.image.load("./img/brain.png")  # Brain
+            self.grass_img = pygame.image.load("img/grass.jpeg")  # grass
+            self.spikeweed_img = pygame.image.load("./img/spikeweed.png")  # spikeweed
+            self.plant_img = pygame.image.load("./img/plant.png")  # plant
+            self.zombie_img = pygame.image.load("./img/zombie.png")  # zombie
             self.house_img = pygame.image.load("./img/house.png")  # house
 
             #Resize images to fit grid size
@@ -224,12 +224,15 @@ class ZombieEscapeEnv(gym.Env):
                 letter = self.r_map[row, col]
                 match letter:
                     case 'B':
+                        canvas.blit(self.grass_img, (row * pix_square_size, col * pix_square_size))
                         canvas.blit(self.brain_img, (row * pix_square_size, col * pix_square_size))
                     case 'L':
                         canvas.blit(self.grass_img, (row * pix_square_size, col * pix_square_size))
                     case 'C':
+                        canvas.blit(self.grass_img, (row * pix_square_size, col * pix_square_size))
                         canvas.blit(self.plant_img, (row * pix_square_size, col * pix_square_size))
                     case 'W':
+                        canvas.blit(self.grass_img, (row * pix_square_size, col * pix_square_size))
                         canvas.blit(self.spikeweed_img, (row * pix_square_size, col * pix_square_size))
        
         # Now we draw the agent
