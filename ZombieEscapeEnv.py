@@ -16,10 +16,11 @@ UP = 3
 class ZombieEscapeEnv(gym.Env):
     metadata = {"render_modes": ["human", "ansi"], "render_fps": 4}
 
-    def __init__(self, render_mode=None, size=8):
+    def __init__(self, render_mode=None, size=8, fixed_seed: Optional[int] = None):
         super(ZombieEscapeEnv, self).__init__()
         #store grid size
         self.grid_size = size
+        self.fixed_seed = fixed_seed
         #PYGAME INITIALIZATIONS
         #only load this if needed
         if render_mode == 'human':
@@ -54,7 +55,7 @@ class ZombieEscapeEnv(gym.Env):
         self.clock = None
 
         #ACTUAL GAME INITIALIZATIONS
-        self.r_map = self.generate_random_map()
+        self.r_map = self.generate_random_map(seed=self.fixed_seed)
         self.nrow, self.ncol = nrow, ncol = self.r_map.shape
 
         nA = 4  # actions
@@ -92,11 +93,11 @@ class ZombieEscapeEnv(gym.Env):
             terminated = new_letter in "CD"
             # decide reward
             if new_letter == "B":
-                reward = 1
+                reward = 0.1
             elif new_letter == "W":
                 reward = -1
             elif new_letter == "D":
-                reward = 5
+                reward = 20
             else:
                 reward = 0
 
@@ -164,7 +165,7 @@ class ZombieEscapeEnv(gym.Env):
         p3 = 0.1
         p4 = 0.1
 
-        np_random, _ = seeding.np_random(seed)
+        np_random, _ = seeding.np_random(seed if seed is not None else self.fixed_seed)
 
         while not valid:
             board = np_random.choice(["L", "W", "C", "B"], (size, size), p=[p1, p2, p3, p4])
@@ -183,12 +184,22 @@ class ZombieEscapeEnv(gym.Env):
 
         # truncation=False as the time limit is handled by the `TimeLimit` wrapper added during `make`
         return int(s), r, t, False, {"prob": p}
+    
+    def fixed_step(self, a):
+        transitions = self.P[self.s][a]        
+        p, s, r, t = transitions[1]
+        self.s = s
+        self.lastaction = a
+
+        # truncation=False as the time limit is handled by the `TimeLimit` wrapper added during `make`
+        return int(s), r, t, False, {"prob": p}
+    
     def _get_agent_location(self):
         #convert state to row, column
         return self.s // self.grid_size, self.s % self.grid_size
     
     def reset(self, *, seed: Optional[int] = None, options: Optional[dict] = None, ):
-        super().reset(seed=seed)
+        super().reset(seed = seed if seed is not None else self.fixed_seed)
         self.s = categorical_sample(self.initial_state_distrib, self.np_random)
         self.lastaction = None
 
