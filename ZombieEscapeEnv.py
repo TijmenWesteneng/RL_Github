@@ -1,4 +1,3 @@
-from enum import Enum
 import numpy as np
 import random
 import pygame
@@ -93,11 +92,13 @@ class ZombieEscapeEnv(gym.Env):
             terminated = new_letter in "CD"
             # decide reward
             if new_letter == "B":
-                reward = 0.1
+                reward = 0.5
             elif new_letter == "W":
-                reward = -1
+                reward = -0.5
             elif new_letter == "D":
-                reward = 20
+                reward = 100
+            elif new_letter == "C":
+                reward = -1000    
             else:
                 reward = 0
 
