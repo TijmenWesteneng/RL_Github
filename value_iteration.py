@@ -40,7 +40,7 @@ class ValueIteration:
                 value = 0
                 # prob is a tuple of (transition probability, next state, reward)
                 for prob in self.zombie_environment.P[state][action]:
-                    value += prob[0]*(prob[2] + self.gamma*self.value_function[prob[1]]) #The value for an action
+                    value += prob[0]*(self.zombie_environment.get_state_reward(state) + self.gamma*self.value_function[prob[1]]) #The value for an action
                 
                 values[action] = value
             #Get max value, best action and store the value and best action
