@@ -90,18 +90,8 @@ class ZombieEscapeEnv(gym.Env):
             new_state = to_s(new_row, new_col)
             new_letter = self.r_map[new_row, new_col]
             terminated = new_letter in "CD"
-            # decide reward
-            if new_letter == "B":
-                reward = 0.5
-            elif new_letter == "W":
-                reward = -0.5
-            elif new_letter == "D":
-                reward = 100
-            elif new_letter == "C":
-                reward = -1000    
-            else:
-                reward = 0
-
+            reward = self.get_reward(new_letter)
+            
             return new_state, reward, terminated
 
         # Fill in self.P
@@ -124,6 +114,7 @@ class ZombieEscapeEnv(gym.Env):
         self.observation_space = spaces.Discrete(nS)
         self.action_space = spaces.Discrete(nA)
 
+    
     def is_valid(self, board: List[List[str]], max_size: int) -> bool:
         # use simple dfs to track there's a valid path from start to Dave's house
         frontier, discovered = [], set()
@@ -197,8 +188,35 @@ class ZombieEscapeEnv(gym.Env):
     
     def _get_agent_location(self):
         #convert state to row, column
-        return self.s // self.grid_size, self.s % self.grid_size
+        return self.convert_state_to_table_index(self.s)
     
+    def convert_state_to_table_index(self, state):
+        return state // self.grid_size, state % self.grid_size
+    
+    def get_reward(self, letter):
+        # decide reward
+        reward:float
+        if letter == "B":
+            reward = 0.5
+        elif letter == "W":
+            reward = -0.5
+        elif letter == "D":
+            reward = 100
+        elif letter == "C":
+            reward = -1000  
+        else:
+            reward = 0
+        
+        return reward
+    
+    def get_letter(self, state):
+        row, column =  self.convert_state_to_table_index(state)
+        return self.r_map[row, column]
+    
+    def get_state_reward(self, state):
+        letter = self.get_letter(state)
+        return self.get_reward(letter)
+
     def reset(self, *, seed: Optional[int] = None, options: Optional[dict] = None, ):
         super().reset(seed = seed if seed is not None else self.fixed_seed)
         self.s = categorical_sample(self.initial_state_distrib, self.np_random)
@@ -233,7 +251,7 @@ class ZombieEscapeEnv(gym.Env):
         #Draw the rest of the objects
         for row in range(self.r_map.shape[0]):
             for col in range(self.r_map.shape[1]):
-                letter = self.r_map[row, col]
+                letter = self.r_map[col, row]
                 match letter:
                     case 'B':
                         canvas.blit(self.grass_img, (row * pix_square_size, col * pix_square_size))
@@ -248,7 +266,7 @@ class ZombieEscapeEnv(gym.Env):
                         canvas.blit(self.spikeweed_img, (row * pix_square_size, col * pix_square_size))
        
         # Now we draw the agent
-        agent_x, agent_y = self._get_agent_location()
+        agent_y, agent_x  = self._get_agent_location()
         canvas.blit(self.zombie_img, (agent_x * pix_square_size, agent_y * pix_square_size))
 
         # Finally, add some gridlines
@@ -296,9 +314,12 @@ class ZombieEscapeEnv(gym.Env):
                 print("".join(row for row in row))
             print("")
 
-    def is_terminal(self):
+    def is_terminal(self, state=None):
+        if state == None:
+          state = self.s
+
         # Check current state to see if it is terminal
-        agent_row, agent_col = int(self.s) // self.grid_size, int(self.s) % self.grid_size
+        agent_row, agent_col = int(state) // self.grid_size, int(state) % self.grid_size
         r_map_copy = self.r_map.copy()
         letter = r_map_copy[agent_row, agent_col]
         if letter in 'CD':
