@@ -12,7 +12,7 @@ class ValueIteration:
         self.number_of_actions = zombie_environment.action_space.n
         self.number_of_states = zombie_environment.observation_space.n
         #INITIALIZE POLICY PROPERTY
-        self.policy = np.zeros(self.number_of_states)
+        self.policy = np.zeros(self.number_of_states, dtype= 'int')
         #INITIALIZE VALUE FUNCTION
         self.initialize_value_function()
         #INITIALIZE CLASS VAR
@@ -29,10 +29,10 @@ class ValueIteration:
         #Initialize q values function to store the values for computing max
         new_value_function = np.zeros(self.number_of_states)
         delta = 0
-        for state in range(self.number_of_states):
+        for state in range(self.number_of_states):                
             #Avoid updating the values of terminal states
             if self.zombie_environment.is_terminal(state):
-                self.value_function[state] = self.zombie_environment.get_state_reward(state)
+                new_value_function[state] = self.zombie_environment.get_state_reward(state)
                 continue
             
             values = np.zeros(self.number_of_actions) #Store the values of the different actions
