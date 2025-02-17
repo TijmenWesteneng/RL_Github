@@ -251,7 +251,7 @@ class ZombieEscapeEnv(gym.Env):
         #Draw the rest of the objects
         for row in range(self.r_map.shape[0]):
             for col in range(self.r_map.shape[1]):
-                letter = self.r_map[row, col]
+                letter = self.r_map[col, row]
                 match letter:
                     case 'B':
                         canvas.blit(self.grass_img, (row * pix_square_size, col * pix_square_size))
@@ -266,7 +266,7 @@ class ZombieEscapeEnv(gym.Env):
                         canvas.blit(self.spikeweed_img, (row * pix_square_size, col * pix_square_size))
        
         # Now we draw the agent
-        agent_x, agent_y = self._get_agent_location()
+        agent_y, agent_x  = self._get_agent_location()
         canvas.blit(self.zombie_img, (agent_x * pix_square_size, agent_y * pix_square_size))
 
         # Finally, add some gridlines
