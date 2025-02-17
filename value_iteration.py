@@ -1,9 +1,10 @@
 from ZombieEscapeEnv import ZombieEscapeEnv
 import numpy as np
+from learning_algorithm import LearningAlgorithm
 
-class ValueIteration:
+class ValueIteration(LearningAlgorithm):
     def __init__(self, zombie_environment:ZombieEscapeEnv, gamma, theta):
-        
+        super().__init__()
         #INITIALIZE CONFIG PARAMETERS
         self.gamma = gamma
         self.theta = theta
@@ -15,8 +16,7 @@ class ValueIteration:
         self.policy = np.zeros(self.number_of_states, dtype= 'int')
         #INITIALIZE VALUE FUNCTION
         self.initialize_value_function()
-        #INITIALIZE CLASS VAR
-        self.trained = False
+        
 
     def initialize_value_function(self):
         self.value_function = np.zeros(self.number_of_states)
@@ -66,12 +66,7 @@ class ValueIteration:
         #Given states find optimal policy
         self.trained = True
 
-    def get_training_results(self):
-        #If model has not been trained
-        if not self.trained:
-            self.run_training()
-        
-        return self.value_function, self.policy
+    
 
 
         
