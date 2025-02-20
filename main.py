@@ -1,5 +1,5 @@
 from ZombieEscapeEnv import ZombieEscapeEnv
-from policy_iteration import policy_iteration
+from policy_iteration import PolicyIteration
 from value_iteration import ValueIteration
 import numpy as np
 # Create and test the environment
@@ -28,7 +28,7 @@ env.close()
 
 '''
 print("POLICIES")
-V,policy = policy_iteration(env, 0.93, 0.00001)
+V,policy = PolicyIteration(env, 0.93, 0.00001).get_training_results()
 print(policy)
 new_value, new_policy = ValueIteration(env, 0.93, 0.00001).get_training_results()
 print(new_policy)
