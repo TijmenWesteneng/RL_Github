@@ -14,6 +14,7 @@ class LearningAlgorithm:
         #If model has not been trained
         if not self.trained:
             self.run_training()
+            self.trained = True
         
         return self.value_function, self.policy
     
