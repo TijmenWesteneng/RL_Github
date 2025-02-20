@@ -60,7 +60,7 @@ class ValueIteration(LearningAlgorithm):
     def run_training(self):
         #Run value iteration until convergence
         delta = self.single_value_iteration()
-        while delta > self.gamma:
+        while delta > self.theta:
             delta = self.single_value_iteration()
 
         #Given states find optimal policy
