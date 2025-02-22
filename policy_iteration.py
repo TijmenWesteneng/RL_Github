@@ -89,5 +89,10 @@ class PolicyIteration(LearningAlgorithm):
             if policy_stable == True:
                 break
         return self.value_function, self.policy
+    
+    def run_training(self):
+        self.policy_improve()
+        self.trained = True
+        return self.value_function, self.policy
                 
 

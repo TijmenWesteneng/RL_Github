@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import numpy as np
 
 class LearningAlgorithm:
     def __init__(self):
