@@ -17,7 +17,7 @@ def mc_prediction(env, policy, num_episodes, gamma):
     """
 
     values = np.zeros(env.observation_space.n)
-    returns = {state: [] for state in range(len(values))} # Initialize an empy list for each state
+    returns = {state: [] for state in range(len(values))} # Initialize an emtpy list for each state
 
     for episode_id in range(num_episodes):  # Loop for the number of episodes
         state, _ = env.reset()
@@ -32,13 +32,11 @@ def mc_prediction(env, policy, num_episodes, gamma):
             state = next_state
 
         G = 0
-        visited_states = set() # Initialize an empty set to track the visited states in the episode
-
         for t in range(len(episode) -1, -1, -1): # Loop from last index to first index of the episode
             state, reward = episode[t]
             G = gamma * G + reward
 
-            if state not in visited_states: # Check if state was already encountered in the episode
+            if state not in [x[0] for x in episode[:t]]: # Check if states occurs somewhere earlier in the episode
                 returns[state].append(G)
                 values[state] = np.mean(returns[state])
     
