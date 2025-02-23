@@ -43,3 +43,25 @@ class LearningAlgorithm:
         ax.set_title("Final policy")
         ax.set_aspect('equal') # ensure that scaling of x and y is equal so the grid remains square
         plt.show()
+
+    def visualise_values(self, title=""):
+        value_matrix = np.flip(self.value_function.reshape(8,8), axis=0)
+
+        ig, ax = plt.subplots(figsize=(8,8))
+        ax.set_xlim(-0.5, 7.5)
+        ax.set_ylim(-0.5, 7.5)
+        ax.set_xticks(np.arange(8) - 0.5)
+        ax.set_yticks(np.arange(8) - 0.5)
+        ax.set_xticklabels([])
+        ax.set_yticklabels([])
+        ax.grid(True, linestyle='--', color='gray', alpha=0.5)
+
+        for r in range(8):
+            for c in range(8):
+                value = value_matrix[r, c].round(2)
+                ax.text(c, r, value, ha='center', va='center')
+
+        ax.set_title(title)
+        ax.set_aspect('equal') # ensure that scaling of x and y is equal so the grid remains square
+        plt.show()
+
