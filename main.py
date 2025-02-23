@@ -30,9 +30,10 @@ env.close()
 
 '''
 # print("POLICIES")
-V,policy = PolicyIteration(env, 0.93, 0.00001).get_training_results()
-visualise_policy(policy)
-mc_learning = MonteCarloPrediction(zombie_environment=env, policy=policy, gamma=0.93, episodes=100)
+policy_iteration = PolicyIteration(env, 0.93, 0.00001)
+V, policy = policy_iteration.get_training_results()
+#policy_iteration.visualise_values()
+mc_learning = MonteCarloPrediction(zombie_environment=env, policy=policy, gamma=0.93, episodes=100000)
 V,policy = mc_learning.get_training_results()
 mc_learning.visualise_values()
 # visualise_values(V)
