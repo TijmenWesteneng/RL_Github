@@ -23,17 +23,21 @@ def mc_prediction(env, policy, num_episodes, gamma):
         state, _ = env.reset()
         episode = []
 
+        reward = 0
+        terminal = False
         while True: # Generate episodes where the actions are performed following the policy until in a terminal state
             action = policy[state]
-            next_state, reward, terminal, _, _ = env.step(action)
-            episode.append((state, reward))
+            episode.append((state, action, reward))
             if terminal:
                 break
+            next_state, reward, terminal, _, _ = env.step(action)
+            
             state = next_state
 
         G = 0
         for t in range(len(episode) -1, -1, -1): # Loop from last index to first index of the episode
-            state, reward = episode[t]
+            state, action, reward = episode[t]
+
             G = gamma * G + reward
 
             if state not in [x[0] for x in episode[:t]]: # Check if states occurs somewhere earlier in the episode

@@ -5,7 +5,8 @@ class MonteCarloControl(MonteCarloLearning):
 
     def __init__(self, zombie_environment:ZombieEscapeEnv, episodes = 50):
         super().__init__()
-
+        self.episodes = episodes
+        self.zombie_environment = zombie_environment
     
     def run_training(self):
         """

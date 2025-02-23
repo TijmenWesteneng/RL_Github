@@ -7,7 +7,10 @@ class MonteCarloLearning(LearningAlgorithm):
 
         self.state_action_value_function = None #The action value function np array [state, action]
         self.state_action_reward = None #Sum of rewards collected for the state action pair, np array [state, action]
-        self.count_visits = None #Count of visits for the state action pair, np array [state, action]
+        self.count_state_action_visits = None #Count of visits for the state action pair, np array [state, action]
+
+        self.state_reward = None #Sum of rewards collected for the state action pair, np array [state, action]
+        self.count_state_visits = None #Count of visits for the state action pair, np array [state, action]
 
     def calculate_expected_return(self, episode, mode):
         """
@@ -19,16 +22,6 @@ class MonteCarloLearning(LearningAlgorithm):
         """
         pass
 
-    def generate_soft_policy(self, policy, epsilon):
-        """
-        Generate a soft policy based on the original policy provded and epsilon change of not following given policy 
-        
-        Parameters:
-        policy: the base policy.
-
-        epsilon: chance of deviating from the original policy
-        """
-        pass
 
 
 

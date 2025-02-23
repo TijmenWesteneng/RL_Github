@@ -168,8 +168,7 @@ class ZombieEscapeEnv(gym.Env):
 
     def step(self, a):
         transitions = self.P[self.s][a]
-        i = categorical_sample([t[0] for t in transitions],
-                               self.np_random)  # choose the next move based on the probability table of this action
+        i = categorical_sample([t[0] for t in transitions], self.np_random)  # choose the next move based on the probability table of this action
         p, s, r, t = transitions[i]
         self.s = s
         self.lastaction = a
