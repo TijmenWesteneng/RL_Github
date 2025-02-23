@@ -342,7 +342,7 @@ class ZombieEscapeEnv(gym.Env):
         return episode
 
 
-    def generate_episode(self, policy, initial_state=0, initial_action = None):
+    def generate_episode(self, policy, initial_state=0, initial_action = None, max_steps = 1000):
         """
         Sample an episode from the env following a policy. (Start at state 0 unless the intial state is specified)
         """
@@ -359,7 +359,8 @@ class ZombieEscapeEnv(gym.Env):
             state = next_state
 
         terminal = False
-        while True: # Generate episodes where the actions are performed following the policy until in a terminal state
+        steps = 0
+        while True and steps < max_steps: # Generate episodes where the actions are performed following the policy until in a terminal state
             if terminal:
                 episode.append((state, action, reward))
                 break
@@ -367,7 +368,7 @@ class ZombieEscapeEnv(gym.Env):
             episode.append((state, action, reward))
             next_state, reward, terminal, _, _ = self.step(action)
             state = next_state
-            
+            steps += 1
         
         return episode
 

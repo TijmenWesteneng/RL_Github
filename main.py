@@ -4,9 +4,10 @@ from value_iteration import ValueIteration
 import numpy as np
 from plotting import visualise_policy, visualise_values
 from monte_carlo_prediction import MonteCarloPrediction
+from monte_carlo_control import MonteCarloControl
 # Create and test the environment
 #env = ZombieEscapeEnv(render_mode=None, fixed_seed = 35)
-env = ZombieEscapeEnv(render_mode='ansi', fixed_seed = 35)
+env = ZombieEscapeEnv(render_mode=None, fixed_seed = 35)
 state, info = env.reset()
 """
 # Reset environment and render
@@ -30,12 +31,16 @@ env.close()
 
 '''
 # print("POLICIES")
-policy_iteration = PolicyIteration(env, 0.93, 0.00001)
-V, policy = policy_iteration.get_training_results()
+#policy_iteration = PolicyIteration(env, 0.93, 0.00001)
+#V, policy = policy_iteration.get_training_results()
 #policy_iteration.visualise_values()
-mc_learning = MonteCarloPrediction(zombie_environment=env, policy=policy, gamma=0.93, episodes=100000)
+""" mc_learning = MonteCarloPrediction(zombie_environment=env, policy=policy, gamma=0.93, episodes=100000)
 V,policy = mc_learning.get_training_results()
-mc_learning.visualise_values()
+mc_learning.visualise_values() """
+mc_control = MonteCarloControl(zombie_environment=env, gamma=0.93, episodes=10000)
+V,policy = mc_control.get_training_results()
+mc_control.visualise_values()
+mc_control.visualise_policy()
 # visualise_values(V)
 
 # values = mc_prediction(env, policy, 10000, 0.93)
