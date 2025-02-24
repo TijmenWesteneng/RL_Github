@@ -45,7 +45,7 @@ class MonteCarloControl(MonteCarloLearning):
             # update count and reward using calculate_expected_return
             self.calculate_expected_return(episode=episode, gamma=self.gamma, mode="state_action_value")
         
-            np.divide(
+            self.state_action_value_function = np.divide(
                 self.state_action_returns, 
                 self.count_state_action_visits,
                 out=self.state_action_value_function,
@@ -54,4 +54,6 @@ class MonteCarloControl(MonteCarloLearning):
 
             self.value_function = np.max(self.state_action_value_function, axis=1)
             self.policy = np.argmax(self.state_action_value_function, axis=1)
+            if episode_iteration == 1000:
+                continue
             print(f"Episode: {episode_iteration}")

@@ -1,4 +1,5 @@
 from learning_algorithm import LearningAlgorithm
+import numpy as np
 
 class MonteCarloLearning(LearningAlgorithm):
 
@@ -20,21 +21,38 @@ class MonteCarloLearning(LearningAlgorithm):
         episode: a list of tuples containing the rewards.
         mode: state or state-action
         """
+        #Improve efficeicncy by first doing forward pass and then check if value needs to be added
+        episode_length = len(episode)
+        returns = np.zeros(episode_length)
+        
         G = 0
-        for t in range(len(episode) -1, -1, -1): # Loop from last index to first index of the episode
+
+        #Backwards
+        for t in range(episode_length - 1, -1, -1):
             state, action, reward = episode[t]
-
             G = gamma * G + reward
+            returns[t] = G
 
-            if state not in [x[0] for x in episode[:t]]:
-                
-                if mode == "state_value":
-                    self.state_returns[state] += G
+        #Forward pass
+        visited_states = set()
+        visited_state_actions = set()
+
+        for t, episode_step in enumerate(episode):
+            
+            state, action, reward = episode_step
+            
+            if mode == "state_value":
+                if state not in visited_states:
+                    visited_states.add(state)
+                    self.state_returns[state] += returns[t]
                     self.count_state_visits[state] += 1
 
-                elif mode == "state_action_value":
-                    self.state_action_returns[state, action] += G
+            elif mode == "state_action_value":
+                if (state, action) not in visited_state_actions:
+                    visited_state_actions.add((state, action))
+                    self.state_action_returns[state, action] += returns[t]
                     self.count_state_action_visits[state, action] += 1
+        
 
 
 
