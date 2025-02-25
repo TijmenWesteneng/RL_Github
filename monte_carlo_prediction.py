@@ -19,7 +19,7 @@ class MonteCarloPrediction(MonteCarloLearning):
         Process:
 
         1 - For each episode do.
-            1- random initiial state selection (check)
+            1- random initiial state selection 
             2 - episode generation based on policy and initial state
             3 - update the count and sum rewards (calling g unction with mode)
             
@@ -27,11 +27,20 @@ class MonteCarloPrediction(MonteCarloLearning):
         
         """
         for _ in range(self.episodes):
-            # episode = generate episode
-            episode = self.zombie_environment.generate_episode(policy=self.policy)
+            # Generate a random non-terminal starting state and random action
+            random_state = np.random.randint(0, self.zombie_environment.observation_space.n)
+            while self.zombie_environment.is_terminal(random_state):
+                random_state = np.random.randint(0, self.zombie_environment.observation_space.n)
+
+            random_action = np.random.randint(0, self.zombie_environment.action_space.n)
+
+            # generate an episode starting at the random starting state and following the policy
+            episode = self.zombie_environment.generate_episode(policy=self.policy, initial_state=random_state, initial_action=random_action)
+            
             # update count and reward using calculate_expected_return
             self.calculate_expected_return(episode=episode, gamma=self.gamma, mode="state_value")
         
+        # Average the returns to compute the value function
         self.value_function = np.where(self.count_state_visits > 0, self.state_returns / self.count_state_visits, 0)  # Assign 0 where count_state_visits is 0
 
 
