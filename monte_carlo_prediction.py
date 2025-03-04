@@ -5,7 +5,7 @@ import numpy as np
 class MonteCarloPrediction(MonteCarloLearning):
 
     def __init__(self, zombie_environment, policy, episodes = 100, max_steps = 50, target_values=None):
-        super().__init__(zombie_environment=zombie_environment, max_steps=max_steps, episodes=episodes)
+        super().__init__(zombie_environment=zombie_environment, max_steps=max_steps, episodes=episodes, target_values=target_values)
         self.episodes = episodes
         self.policy = policy
         self.value_function = np.zeros(self.number_of_states)
