@@ -5,10 +5,12 @@ import numpy as np
 from plotting import visualise_policy, visualise_values
 from monte_carlo_prediction import MonteCarloPrediction
 from monte_carlo_control import MonteCarloControl
+from TD_prediction import TD_Prediction
 # Create and test the environment
 #env = ZombieEscapeEnv(render_mode=None, fixed_seed = 35)
-env = ZombieEscapeEnv(render_mode=None, fixed_seed = 35)
+env = ZombieEscapeEnv(render_mode="ansi", fixed_seed = 36)
 state, info = env.reset()
+#env.render()
 """
 # Reset environment and render
 state = env.reset()
@@ -30,20 +32,25 @@ env.close()
 # print("Collected Episode:", episode)
 
 '''
+
 # print("POLICIES")
-""" policy_iteration = PolicyIteration(env, 0.93, 0.00001)
+policy_iteration = PolicyIteration(env, 0.93, 0.00001)
 V, policy = policy_iteration.get_training_results()
+
 policy_iteration.visualise_values()
-mc_learning = MonteCarloPrediction(zombie_environment=env, policy=policy, gamma=0.93, episodes=10000)
-V,policy = mc_learning.get_training_results()
-mc_learning.visualise_values() """
+TD = TD_Prediction(zombie_environment=env, alpha=0.1, policy=policy, gamma=0.93, episodes=10000)
+V1,policy1 = TD.get_training_results()
+#mc_learning.visualise_values() 
+print(V)
+print(V1)
+'''
 mc_control = MonteCarloControl(zombie_environment=env, gamma=0.93, episodes=10000)
 V,policy = mc_control.get_training_results()
 mc_control.visualise_values()
-mc_control.visualise_policy()
+mc_control.visualise_policy()'''
 # visualise_values(V)
 
-# values = mc_prediction(env, policy, 10000, 0.93)
+#values = mc_prediction(env, policy, 10000, 0.93)
 
 # visualise_values(values)
 
@@ -57,12 +64,16 @@ mc_control.visualise_policy()
 # print(V)
 # print(new_value)
 
-# terminal = False
-# while not terminal:
-#     action = new_policy[env.s]
-#     #print(action)
-#     next_state, reward, terminal = env.step(action)[:3]
-#     env.render()
-#     state = next_state
-# env.close()
-
+'''
+new_policy = np.array([1, 0, 3, 2, 1, 1, 0, 3, 2, 2, 1, 2, 2, 1, 1, 1, 2, 2, 2, 2, 2, 2, 
+                1, 1, 2, 2, 2, 3, 3, 2, 1, 1, 3, 3, 0, 3, 3, 2, 2, 1, 3, 3, 2, 1, 
+                1, 3, 3, 1, 2, 2, 1, 1, 0, 3, 3, 2, 2, 2, 2, 2, 2, 1, 1, 3])
+terminal = False
+while not terminal:
+    action = new_policy[env.s]
+    print(action)
+    next_state, reward, terminal = env.step(action)[:3]
+    env.render()
+    state = next_state
+env.close()
+'''
