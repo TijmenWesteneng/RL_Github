@@ -1,31 +1,25 @@
-from ZombieEscapeEnv import ZombieEscapeEnv
 import numpy as np
 from learning_algorithm import LearningAlgorithm
 
 class ValueIteration(LearningAlgorithm):
-    def __init__(self, zombie_environment:ZombieEscapeEnv, gamma, theta):
-        super().__init__()
+    """
+    Inherits learning algorithms and impleemnts value iteration algorithm.
+    """
+    def __init__(self, zombie_environment, theta):
+        super().__init__(zombie_environment=zombie_environment)
         #INITIALIZE CONFIG PARAMETERS
-        self.gamma = gamma
         self.theta = theta
-        #INITIALIZE ENVIRONMENT VALUES
-        self.zombie_environment = zombie_environment
-        self.number_of_actions = zombie_environment.action_space.n
-        self.number_of_states = zombie_environment.observation_space.n
         #INITIALIZE POLICY PROPERTY
         self.policy = np.zeros(self.number_of_states, dtype= 'int')
         #INITIALIZE VALUE FUNCTION
         self.initialize_value_function()
         
-
-    def initialize_value_function(self):
-        self.value_function = np.zeros(self.number_of_states)
-        for state in range(self.number_of_states):
-            if self.zombie_environment.is_terminal(state):
-                self.value_function[state] = self.zombie_environment.get_state_reward(state)
-        
     
     def single_value_iteration(self):
+        """
+        Implement a single value function iteration.
+        Returns: delta: the value of delta after the iteration
+        """
         #Initialize q values function to store the values for computing max
         new_value_function = np.zeros(self.number_of_states)
         delta = 0
@@ -58,6 +52,9 @@ class ValueIteration(LearningAlgorithm):
                 
                 
     def run_training(self):
+        """
+        Implement the method for running a training. Train the agent until delta is smaller or equal than theta.
+        """
         #Run value iteration until convergence
         delta = self.single_value_iteration()
         while delta > self.theta:

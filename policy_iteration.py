@@ -3,29 +3,16 @@ import numpy as np
 from learning_algorithm import LearningAlgorithm
 
 class PolicyIteration(LearningAlgorithm):
-    def __init__(self, zombie_environment:ZombieEscapeEnv, gamma, theta):
-        super().__init__()
+    def __init__(self, zombie_environment, theta):
+        super().__init__(zombie_environment=zombie_environment)
         #INITIALIZE CONFIG PARAMETERS
-        self.gamma = gamma
         self.theta = theta
-        #INITIALIZE ENVIRONMENT VALUES
-        self.zombie_environment = zombie_environment
-        self.number_of_actions = zombie_environment.action_space.n
-        self.number_of_states = zombie_environment.observation_space.n
         #INITIALIZE POLICY PROPERTY
         action = self.zombie_environment.action_space.sample()
         self.policy = np.zeros(self.number_of_states, dtype= 'int')
         self.policy += action
         #INITIALIZE VALUE FUNCTION
         self.initialize_value_function()
-        
-        
-        
-    def initialize_value_function(self):
-        self.value_function = np.zeros(self.number_of_states)
-        for state in range(self.number_of_states):
-            if self.zombie_environment.is_terminal(state):
-                self.value_function[state] = self.zombie_environment.get_state_reward(state)
                 
     def policy_evaluation(self):
         while True:

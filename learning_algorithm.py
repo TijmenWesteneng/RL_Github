@@ -1,12 +1,32 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from ZombieEscapeEnv import ZombieEscapeEnv
 
 class LearningAlgorithm:
-    def __init__(self):
+    """
+    This class represents the base case for a learning algorithm. It contains methods shared by all algorithms such as getters and plotting.
+    """
+    def __init__(self, zombie_environment:ZombieEscapeEnv):
         #INITIALIZE CLASS VAR
         self.trained = False
         self.value_function = None
         self.policy = None
+        #INITIALIZE ENVIRONMENT VALUES
+        self.zombie_environment = zombie_environment
+        self.number_of_actions = zombie_environment.action_space.n
+        self.number_of_states = zombie_environment.observation_space.n
+        self.gamma = self.zombie_environment.get_gamma()
+        
+
+
+    def initialize_value_function(self):
+        """
+        Initialize value function as 0 on non terminal states and as reward for terminal states.
+        """
+        self.value_function = np.zeros(self.number_of_states)
+        for state in range(self.number_of_states):
+            if self.zombie_environment.is_terminal(state):
+                self.value_function[state] = self.zombie_environment.get_state_reward(state)
 
     def run_training(self):
         pass

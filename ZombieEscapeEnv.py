@@ -15,7 +15,7 @@ UP = 3
 class ZombieEscapeEnv(gym.Env):
     metadata = {"render_modes": ["human", "ansi"], "render_fps": 4}
 
-    def __init__(self, render_mode=None, size=8, fixed_seed: Optional[int] = None):
+    def __init__(self, render_mode=None, size=8, fixed_seed: Optional[int] = None, gamma=1):
         super(ZombieEscapeEnv, self).__init__()
         #store grid size
         self.grid_size = size
@@ -56,7 +56,7 @@ class ZombieEscapeEnv(gym.Env):
         #ACTUAL GAME INITIALIZATIONS
         self.r_map = self.generate_random_map(seed=self.fixed_seed)
         self.nrow, self.ncol = nrow, ncol = self.r_map.shape
-
+        self.gamma = gamma
         nA = 4  # actions
         nS = nrow * ncol  # states
 
@@ -114,6 +114,8 @@ class ZombieEscapeEnv(gym.Env):
         self.observation_space = spaces.Discrete(nS)
         self.action_space = spaces.Discrete(nA)
 
+    def get_gamma(self):
+        return self.gamma
     
     def is_valid(self, board: List[List[str]], max_size: int) -> bool:
         # use simple dfs to track there's a valid path from start to Dave's house
@@ -342,7 +344,7 @@ class ZombieEscapeEnv(gym.Env):
         return episode
 
 
-    def generate_episode(self, policy, initial_state=0, initial_action = None, max_steps = 10000):
+    def generate_episode(self, policy, initial_state=0, initial_action = None, max_steps = 50):
         """
         Sample an episode from the env following a policy. (Start at state 0 unless the intial state is specified)
         """
@@ -350,7 +352,7 @@ class ZombieEscapeEnv(gym.Env):
         state = initial_state
         self.s = initial_state
         episode = []
-        reward = 0
+        reward = self.get_state_reward(initial_state)
 
         if not initial_action == None:
             action = initial_action
@@ -360,6 +362,7 @@ class ZombieEscapeEnv(gym.Env):
 
         terminal = False
         steps = 0
+        truncated = False
         while True and steps < max_steps: # Generate episodes where the actions are performed following the policy until in a terminal state
             if terminal:
                 episode.append((state, action, reward))
@@ -370,7 +373,10 @@ class ZombieEscapeEnv(gym.Env):
             state = next_state
             steps += 1
         
-        return episode
+        if steps >= max_steps:
+            truncated = True
+
+        return episode, truncated
 
     
     def close(self):

@@ -4,16 +4,14 @@ import numpy as np
 
 class MonteCarloControl(MonteCarloLearning):
 
-    def __init__(self, zombie_environment:ZombieEscapeEnv, episodes = 50, gamma=1):
-        super().__init__()
+    def __init__(self, zombie_environment, episodes = 100, max_steps = 50, target_values=None):
+        super().__init__(zombie_environment = zombie_environment, max_steps=max_steps, target_values=target_values, episodes=episodes)
         self.episodes = episodes
-        self.zombie_environment = zombie_environment
-        self.gamma = gamma
-        self.policy = np.zeros(self.zombie_environment.observation_space.n, dtype='int')
+        self.policy = np.zeros(self.number_of_states, dtype='int')
 
-        self.state_action_value_function = np.zeros((self.zombie_environment.observation_space.n, self.zombie_environment.action_space.n)) #The action value function np array [state, action]
-        self.state_action_returns = np.zeros((self.zombie_environment.observation_space.n, self.zombie_environment.action_space.n)) #Sum of rewards collected for the state action pair, np array [state, action]
-        self.count_state_action_visits = np.zeros((self.zombie_environment.observation_space.n, self.zombie_environment.action_space.n), dtype='int') #Count of visits for the state action pair, np array [state, action]
+        self.state_action_value_function = np.zeros((self.number_of_states, self.number_of_actions)) #The action value function np array [state, action]
+        self.state_action_returns = np.zeros((self.number_of_states, self.number_of_actions)) #Sum of rewards collected for the state action pair, np array [state, action]
+        self.count_state_action_visits = np.zeros((self.number_of_states, self.number_of_actions), dtype='int') #Count of visits for the state action pair, np array [state, action]
 
     
     def run_training(self):
@@ -33,18 +31,22 @@ class MonteCarloControl(MonteCarloLearning):
         """
 
 
-        for episode_iteration in range(self.episodes):
-            #Generate random state
-            random_state = np.random.randint(0, self.zombie_environment.observation_space.n)
-            while self.zombie_environment.is_terminal(random_state):
-                random_state = np.random.randint(0, self.zombie_environment.observation_space.n)
+        for episode_number in range(self.episodes):
+            #Only generate complete episodes for monte carlo methods
+            truncated = True
+            while truncated:
+                #Generate random state
+                random_state = np.random.randint(0, self.number_of_states)
+                while self.zombie_environment.is_terminal(random_state):
+                    random_state = np.random.randint(0, self.number_of_states)
+                
+                random_action = np.random.randint(0, self.number_of_actions)
+                # generate episode with random start
+                episode, truncated = self.zombie_environment.generate_episode(policy=self.policy, initial_state=random_state, initial_action=random_action, max_steps=self.max_steps)
+                # update count and reward using calculate_expected_return
             
-            random_action = np.random.randint(0, self.zombie_environment.action_space.n)
-            # generate episode with random start
-            episode = self.zombie_environment.generate_episode(policy=self.policy, initial_state=random_state, initial_action=random_action)
-            # update count and reward using calculate_expected_return
             self.calculate_expected_return(episode=episode, gamma=self.gamma, mode="state_action_value")
-        
+            
             self.state_action_value_function = np.divide(
                 self.state_action_returns, 
                 self.count_state_action_visits,
@@ -54,6 +56,8 @@ class MonteCarloControl(MonteCarloLearning):
 
             self.value_function = np.max(self.state_action_value_function, axis=1)
             self.policy = np.argmax(self.state_action_value_function, axis=1)
-            if episode_iteration == 1000:
-                continue
-            print(f"Episode: {episode_iteration}")
+            
+            if self.target_values is not None:
+                self.store_error(episode_number)
+
+            print(f"Episode: {episode_number}")
