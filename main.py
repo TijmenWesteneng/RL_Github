@@ -4,6 +4,7 @@ from value_iteration import ValueIteration
 import numpy as np
 from monte_carlo_prediction import MonteCarloPrediction
 from monte_carlo_control import MonteCarloControl
+from TD0 import TD_Prediction
 # Create and test the environment
 #env = ZombieEscapeEnv(render_mode=None, fixed_seed = 35)
 env = ZombieEscapeEnv(render_mode=None, fixed_seed = 35, gamma=0.93)
@@ -42,11 +43,17 @@ V, policy = policy_iteration.get_training_results()
 """ mc_learning = MonteCarloPrediction(zombie_environment=env, policy=policy, episodes=10000, max_steps=100, target_values=V)
 V,policy = mc_learning.get_training_results()
 mc_learning.plot_error() """
-mc_control = MonteCarloControl(zombie_environment=env, episodes=100000, max_steps=100, target_values=V)
+""" mc_control = MonteCarloControl(zombie_environment=env, episodes=100000, max_steps=100, target_values=V)
 V,policy = mc_control.get_training_results()
 mc_control.visualise_values()
 mc_control.visualise_policy()
-mc_control.plot_error()
+mc_control.plot_error() """
+td_learning = TD_Prediction(zombie_environment=env, policy=policy, alpha=0.9, episodes=10000, target_values=V)
+predicted_V, predicted_policy = td_learning.get_training_results()
+td_learning.visualise_values()
+#td_learning.visualise_policy()
+td_learning.plot_error()
+
 # visualise_values(V)
 
 # values = mc_prediction(env, policy, 10000, 0.93)
