@@ -20,15 +20,6 @@ class LearningAlgorithm:
         # Initialize list consisting of tuples of episode number and cumulative reward for that episode
         self.cum_reward_list = []
 
-    def initialize_value_function(self):
-        """
-        Initialize value function as 0 on non terminal states and as reward for terminal states.
-        """
-        self.value_function = np.zeros(self.number_of_states)
-        for state in range(self.number_of_states):
-            if self.zombie_environment.is_terminal(state):
-                self.value_function[state] = self.zombie_environment.get_state_reward(state)
-
     def run_training(self):
         pass
 
