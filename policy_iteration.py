@@ -12,7 +12,9 @@ class PolicyIteration(LearningAlgorithm):
         self.policy = np.zeros(self.number_of_states, dtype= 'int')
         self.policy += action
         #INITIALIZE VALUE FUNCTION
-        self.initialize_value_function()
+        self.value_function = np.zeros(self.number_of_states)
+        
+
                 
     def policy_evaluation(self):
         while True:
@@ -24,7 +26,6 @@ class PolicyIteration(LearningAlgorithm):
                 original_action = self.policy[state]
                 #Avoid updating the values of terminal states
                 if self.zombie_environment.is_terminal(state):
-                    new_value_function[state] = self.zombie_environment.get_state_reward(state)
                     continue
                 
                 #initialize value_update to calculate the sum of V(pi) for 4 directions

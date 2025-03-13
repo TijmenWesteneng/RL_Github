@@ -12,7 +12,7 @@ class ValueIteration(LearningAlgorithm):
         #INITIALIZE POLICY PROPERTY
         self.policy = np.zeros(self.number_of_states, dtype= 'int')
         #INITIALIZE VALUE FUNCTION
-        self.initialize_value_function()
+        self.value_function = np.zeros(self.number_of_states)
         
     
     def single_value_iteration(self):
@@ -26,7 +26,6 @@ class ValueIteration(LearningAlgorithm):
         for state in range(self.number_of_states):                
             #Avoid updating the values of terminal states
             if self.zombie_environment.is_terminal(state):
-                new_value_function[state] = self.zombie_environment.get_state_reward(state)
                 continue
             
             values = np.zeros(self.number_of_actions) #Store the values of the different actions
@@ -34,7 +33,7 @@ class ValueIteration(LearningAlgorithm):
                 value = 0
                 # prob is a tuple of (transition probability, next state, reward)
                 for prob in self.zombie_environment.P[state][action]:
-                    value += prob[0]*(self.zombie_environment.get_state_reward(state) + self.gamma*self.value_function[prob[1]]) #The value for an action
+                    value += prob[0]*(prob[2] + self.gamma*self.value_function[prob[1]]) #The value for an action
                 
                 values[action] = value
             #Get max value, best action and store the value and best action
