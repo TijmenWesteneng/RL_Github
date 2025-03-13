@@ -37,7 +37,7 @@ class LearningAlgorithm:
         specified by the policy. For terminal states, the name of the terminal state, e.g. Chomper,
         is plotted instead of an arrow.
         """
-        policy_matrix = np.flip(self.policy.reshape(8,8), axis=0) # Flip the rows so row 0 is at the bottom and row 7 is at the top to be in line with the pygame environment
+        policy_matrix = self.policy.reshape(8,8)
 
         arrows = {0:(-1,0), 1:(0,-1), 2:(1,0), 3:(0,1)} # For each action, we define the x and y direction of the arrow (e.g., for action 0, i.e. left, the arrow should point in direction (-1, 0))
         scale = 0.3
@@ -58,11 +58,11 @@ class LearningAlgorithm:
                 if not self.zombie_environment.is_terminal(state_id):
                     action = policy_matrix[r, c]
                     dx, dy = arrows[action] # Get the arrow x and y directions
-                    ax.arrow(c, r, dx * scale, dy * scale, head_width=0.2, head_length=0.2, fc='blue', ec='blue') # create an arrow for the cell 
+                    ax.arrow(c, 7 - r, dx * scale, dy * scale, head_width=0.2, head_length=0.2, fc='blue', ec='blue') # create an arrow for the cell 
                 elif self.zombie_environment.get_letter(state_id) == "C":
-                    ax.text(c, r, "Chomper", fontsize=10, ha='center', va='center')
+                    ax.text(c, 7 - r, "Chomper", fontsize=10, ha='center', va='center')
                 elif self.zombie_environment.get_letter(state_id) == "D":
-                    ax.text(c, r, "Dave's\nhouse", fontsize=10, ha='center', va='center')
+                    ax.text(c, 7 - r, "Dave's\nhouse", fontsize=10, ha='center', va='center')
 
         ax.set_title('Policy')
         ax.set_aspect('equal') # ensure that scaling of x and y is equal so the grid remains square
@@ -96,10 +96,10 @@ class LearningAlgorithm:
         """
         Plot the value matrix on an 8x8 grid as a heatmap.
         """
-        value_matrix = self.value_function.reshape(8,8)
+        value_matrix = np.flip(self.value_function.reshape(8,8), axis=0)
         
         fig, ax = plt.subplots(figsize=(8,8))
-        im = ax.imshow(value_matrix)
+        im = ax.imshow(value_matrix, origin='lower')
 
         ax.set_xlim(-0.5, 7.5)
         ax.set_ylim(-0.5, 7.5)
