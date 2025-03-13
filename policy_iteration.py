@@ -31,7 +31,8 @@ class PolicyIteration(LearningAlgorithm):
                 value_update = 0
                 #implementing Bellman expectation equation
                 for prob in self.zombie_environment.P[state][original_action]:
-                    value_update += prob[0]*(self.zombie_environment.get_state_reward(state) + self.gamma*self.value_function[prob[1]])
+                    #value_update += prob[0]*(self.zombie_environment.get_state_reward(state) + self.gamma*self.value_function[prob[1]])
+                    value_update += prob[0]*(prob[2] + self.gamma*self.value_function[prob[1]])
                 
                 #store the updated value
                 new_value_function[state] = value_update
@@ -63,7 +64,8 @@ class PolicyIteration(LearningAlgorithm):
                     #initialize q to calculate q value for each action
                     q_value_action = 0
                     for prob in self.zombie_environment.P[state][action]:
-                        q_value_action += prob[0]*(self.zombie_environment.get_state_reward(state) + self.gamma*self.value_function[prob[1]])
+                        #q_value_action += prob[0]*(self.zombie_environment.get_state_reward(state) + self.gamma*self.value_function[prob[1]])
+                        q_value_action += prob[0]*(prob[2] + self.gamma*self.value_function[prob[1]])
                     #update q_value array, the index of the array corresponds to the current direction
                     q_value[action] = q_value_action
                 
