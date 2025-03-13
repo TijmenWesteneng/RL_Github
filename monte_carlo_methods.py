@@ -58,7 +58,7 @@ class MonteCarloLearning(LearningAlgorithm):
         
     def store_error(self, episode_number):
         #calculate squared error
-        self.errors[episode_number] = np.mean( (self.value_function - self.target_values) ** 2 )
+        self.errors[episode_number] = np.sqrt(np.mean( (self.value_function - self.target_values) ** 2 ))
 
     def plot_error(self):
         import matplotlib.pyplot as plt

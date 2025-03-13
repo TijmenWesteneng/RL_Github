@@ -327,22 +327,6 @@ class ZombieEscapeEnv(gym.Env):
             return True
         return False
 
-    def sample_episode(self, env, max_steps=50):
-        """Sample an episode from the environment using a random policy."""
-        episode = []
-        state, info = env.reset()
-        terminal = False
-
-        while not terminal:
-            action = env.action_space.sample()
-            next_state, reward, terminal = env.step(action)[:3]
-            episode.append((state, action, reward))
-            env.render()
-            state = next_state
-        self.close()
-        print("Game over!")
-        return episode
-
 
     def generate_episode(self, policy, initial_state=0, initial_action = None, max_steps = 50):
         """
@@ -352,25 +336,21 @@ class ZombieEscapeEnv(gym.Env):
         state = initial_state
         self.s = initial_state
         episode = []
-        reward = self.get_state_reward(initial_state)
-
-        if not initial_action == None:
+        if initial_action == None:
+            action = policy[state]
+        else:
             action = initial_action
-            episode.append((initial_state, action, reward))
-            next_state, reward, terminal, _, _ = self.step(action)
-            state = next_state
-
         terminal = False
         steps = 0
         truncated = False
-        while True and steps < max_steps: # Generate episodes where the actions are performed following the policy until in a terminal state
-            if terminal:
-                episode.append((state, action, reward))
-                break
-            action = policy[state]
-            episode.append((state, action, reward))
+
+        while not terminal and steps < max_steps: # Generate episodes where the actions are performed following the policy until in a terminal state
+            
             next_state, reward, terminal, _, _ = self.step(action)
+            episode.append((state, action, reward))
+            
             state = next_state
+            action = policy[state]
             steps += 1
         
         if steps >= max_steps:

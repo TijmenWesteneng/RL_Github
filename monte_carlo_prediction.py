@@ -8,9 +8,9 @@ class MonteCarloPrediction(MonteCarloLearning):
         super().__init__(zombie_environment=zombie_environment, max_steps=max_steps, episodes=episodes, target_values=target_values)
         self.episodes = episodes
         self.policy = policy
-        self.value_function = np.zeros(self.number_of_states)
-        self.count_state_visits = np.zeros(self.number_of_states)
-        self.state_returns = np.zeros(self.number_of_states)
+        self.state_action_value_function = np.zeros((self.number_of_states, self.number_of_actions)) #The action value function np array [state, action]
+        self.state_action_returns = np.zeros((self.number_of_states, self.number_of_actions)) #Sum of rewards collected for the state action pair, np array [state, action]
+        self.count_state_action_visits = np.zeros((self.number_of_states, self.number_of_actions), dtype='int') #Count of visits for the state action pair, np array [state, action]
 
     
     def run_training(self):
@@ -40,34 +40,23 @@ class MonteCarloPrediction(MonteCarloLearning):
                 episode, truncated = self.zombie_environment.generate_episode(policy=self.policy, initial_state=random_state, initial_action=random_action, max_steps=self.max_steps)
                 
             # update count and reward using calculate_expected_return
-            self.calculate_expected_return(episode=episode, gamma=self.gamma, mode="state_value")
-
-            print(f"Episode: {episode_number}")
-            # Average the returns to compute the value function
-            #self.value_function = np.where(self.count_state_visits > 0, self.state_returns / self.count_state_visits, 0)  # Assign 0 where count_state_visits is 0
-            self.value_function = np.divide(
-                self.state_returns,
-                self.count_state_visits,
-                out=self.value_function,
-                where=self.count_state_visits>0
+            self.calculate_expected_return(episode=episode, gamma=self.gamma, mode="state_action_value")
+           
+            self.state_action_value_function = np.divide(
+                self.state_action_returns, 
+                self.count_state_action_visits,
+                out=self.state_action_value_function,
+                where=self.count_state_action_visits>0
             )
+
+            self.value_function = np.max(self.state_action_value_function, axis=1)
+
+            
             if self.target_values is not None:
                 self.store_error(episode_number)
 
-    def store_error(self, episode_number):
-        #calculate squared error
-        self.errors[episode_number] = np.mean( (self.value_function - self.target_values) ** 2 )
+            print(f"Episode: {episode_number}")
 
-    def plot_error(self):
-        import matplotlib.pyplot as plt
 
-        x = list(range(len(self.errors)))
-        
-        plt.plot(x, self.errors)
-        # Labels and title
-        plt.xlabel("episodes")
-        plt.ylabel("mean squared error")
-        plt.legend()
-        plt.show()
 
 

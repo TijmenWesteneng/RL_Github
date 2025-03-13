@@ -32,10 +32,10 @@ class MonteCarloControl(MonteCarloLearning):
 
 
         for episode_number in range(self.episodes):
-            #Only generate complete episodes for monte carlo methods
+            #Only generate complete episodes for monte carlo methods, avoid them being too long
             truncated = True
             while truncated:
-                #Generate random state
+                #Generate random state that is not terminal
                 random_state = np.random.randint(0, self.number_of_states)
                 while self.zombie_environment.is_terminal(random_state):
                     random_state = np.random.randint(0, self.number_of_states)
