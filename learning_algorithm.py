@@ -41,6 +41,7 @@ class LearningAlgorithm:
         return self.value_function, self.policy
     
     def visualise_policy(self):
+
         policy_matrix = self.policy.reshape(8,8)
 
         arrows = {0:(-1,0), 1:(0,-1), 2:(1,0), 3:(0,1)} # For each action, we define the x and y direction of the arrow (e.g., for action 0, i.e. left, the arrow should point in direction (-1, 0))
@@ -57,11 +58,16 @@ class LearningAlgorithm:
 
         for r in range(8):
             for c in range(8):
-                action = policy_matrix[r, c]
-                dx, dy = arrows[action] # Get the arrow x and y directions
-                ax.arrow(c, 7 - r, dx * scale, dy * scale, head_width=0.2, head_length=0.2, fc='blue', ec='blue') # create an arrow for the cell 
+                state_id = r * 8 + c
+                # Check if the state is terminal, if yes plot an arrow, if no plot a T
+                if not self.zombie_environment.is_terminal(state_id):
+                    action = policy_matrix[r, c]
+                    dx, dy = arrows[action] # Get the arrow x and y directions
+                    ax.arrow(c, 7 - r, dx * scale, dy * scale, head_width=0.2, head_length=0.2, fc='blue', ec='blue') # create an arrow for the cell 
+                else:
+                    ax.text(c, 7 - r, "T", fontsize=14, ha='center', va='center')
 
-        ax.set_title("Final policy")
+        ax.set_title('Policy')
         ax.set_aspect('equal') # ensure that scaling of x and y is equal so the grid remains square
         plt.show()
 
