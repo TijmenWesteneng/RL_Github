@@ -16,8 +16,9 @@ class LearningAlgorithm:
         self.number_of_actions = zombie_environment.action_space.n
         self.number_of_states = zombie_environment.observation_space.n
         self.gamma = self.zombie_environment.get_gamma()
-        
 
+        # Initialize list consisting of tuples of episode number and cumulative reward for that episode
+        self.cum_reward_list = []
 
     def initialize_value_function(self):
         """
@@ -85,3 +86,35 @@ class LearningAlgorithm:
         ax.set_aspect('equal') # ensure that scaling of x and y is equal so the grid remains square
         plt.show()
 
+    def calc_policy_reward(self, episode_n):
+        """
+        Calculates and saves cumulative reward for current policy.
+        TODO: Allow for non-deterministic policies
+        """
+        cum_reward = 0
+
+        state = self.zombie_environment.reset()[0]
+        state_n = 0
+        terminal = False
+        while not terminal:
+            action = self.policy[state]
+            next_state, reward, terminal = self.zombie_environment.step(action)[:3]
+            # TODO: Check if this cumulative reward calc is correct
+            cum_reward += self.gamma ** state_n * reward
+            state = next_state
+
+            # To prevent infinite loops, episodes max out at 10000 visited states
+            state_n += 1
+            if state_n > 10000:
+                cum_reward = -100
+                break
+
+        self.cum_reward_list.append((episode_n, cum_reward))
+
+    def plot_cum_reward(self):
+        index, cum_reward_list = zip(*self.cum_reward_list)
+        plt.scatter(index, cum_reward_list)
+        plt.xlabel("Episode number")
+        plt.ylabel("Cumulative reward")
+        plt.title("Cumulative reward of policy over episodes")
+        plt.show()
