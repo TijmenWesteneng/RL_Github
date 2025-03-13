@@ -16,8 +16,18 @@ class LearningAlgorithm:
         self.number_of_actions = zombie_environment.action_space.n
         self.number_of_states = zombie_environment.observation_space.n
         self.gamma = self.zombie_environment.get_gamma()
+
         # Initialize list consisting of tuples of episode number and cumulative reward for that episode
         self.cum_reward_list = []
+
+    def initialize_value_function(self):
+        """
+        Initialize value function as 0 on non terminal states and as reward for terminal states.
+        """
+        self.value_function = np.zeros(self.number_of_states)
+        for state in range(self.number_of_states):
+            if self.zombie_environment.is_terminal(state):
+                self.value_function[state] = self.zombie_environment.get_state_reward(state)
 
     def run_training(self):
         pass
@@ -54,8 +64,10 @@ class LearningAlgorithm:
                     action = policy_matrix[r, c]
                     dx, dy = arrows[action] # Get the arrow x and y directions
                     ax.arrow(c, 7 - r, dx * scale, dy * scale, head_width=0.2, head_length=0.2, fc='blue', ec='blue') # create an arrow for the cell 
-                else:
-                    ax.text(c, 7 - r, "T", fontsize=14, ha='center', va='center')
+                elif self.zombie_environment.get_letter(state_id) == "C":
+                    ax.text(c, 7 - r, "Chomper", fontsize=10, ha='center', va='center')
+                elif self.zombie_environment.get_letter(state_id) == "D":
+                    ax.text(c, 7 - r, "Dave's\nhouse", fontsize=10, ha='center', va='center')
 
         ax.set_title('Policy')
         ax.set_aspect('equal') # ensure that scaling of x and y is equal so the grid remains square
