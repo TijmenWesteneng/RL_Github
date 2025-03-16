@@ -137,18 +137,19 @@ class LearningAlgorithm:
             cum_reward += self.gamma ** state_n * reward
             state = next_state
 
-            # To prevent infinite loops, episodes max out at 10000 visited states
+            # To prevent infinite loops, episodes max out at 1000 visited states
             state_n += 1
-            if state_n > 10000:
+            if state_n > 1000:
                 cum_reward = -100
                 break
 
         self.cum_reward_list.append((episode_n, cum_reward))
 
     def plot_cum_reward(self):
-        index, cum_reward_list = zip(*self.cum_reward_list)
-        plt.scatter(index, cum_reward_list)
-        plt.xlabel("Episode number")
-        plt.ylabel("Cumulative reward")
-        plt.title("Cumulative reward of policy over episodes")
-        plt.show()
+        if len(self.cum_reward_list) > 0:
+            index, cum_reward_list = zip(*self.cum_reward_list)
+            plt.scatter(index, cum_reward_list)
+            plt.xlabel("Episode number")
+            plt.ylabel("Cumulative reward")
+            plt.title("Cumulative reward of policy over episodes")
+            plt.show()
