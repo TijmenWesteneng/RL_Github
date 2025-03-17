@@ -75,23 +75,6 @@ class TDQLearning(LearningAlgorithm):
         self.policy = np.argmax(self.qsa, axis=1)
         self.value_function = np.max(self.qsa, axis=1)
 
-    def store_error(self, episode_number):
-        """Calculate Mean Squared Error and save to error array"""
-        self.errors[episode_number] = np.mean((self.value_function - self.target_values) ** 2)
-
-    def plot_error(self):
-        """Plot Mean Squared Error over episodes"""
-        x = list(range(len(self.errors)))
-
-        plt.plot(x, self.errors)
-
-        # Labels and title
-        plt.xlabel("Episodes")
-        plt.ylabel("Mean Squared Error")
-        plt.legend()
-
-        plt.show()
-
 # Create the environment we'll use to train
 env = ZombieEscapeEnv(render_mode='ansi', fixed_seed=24, gamma=0.93)
 
