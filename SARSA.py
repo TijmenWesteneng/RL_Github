@@ -22,6 +22,10 @@ class SARSA(LearningAlgorithm):
     
     
     def epsilon_policy(self, epsilon, Q_S_A, state, env):
+        '''
+        Applying epsilon greedy stratgy,
+        return the corresponding action given current epsilon
+        '''
         prob = random.uniform(0, 1)
         if prob < epsilon:
             action = env.action_space.sample()
@@ -32,21 +36,23 @@ class SARSA(LearningAlgorithm):
 
 
     def run_training(self):
-        for episode in range(self.episodes):           
+        for episode in range(self.episodes):
+            #restrat the environment after every episode
             state, info = self.zombie_environment.reset()
-            epsilon =  1 / (1 + episode / 5000)
-                
+            epsilon =  1 / (1 + episode / 5000)#adjust epsilon to decay gradually                  
             action = self.epsilon_policy(epsilon, self.Q_S_A, state, self.zombie_environment)
             terminated = False
-                
-                
+            
+
             while not terminated:
                 next_state, reward, terminated = self.zombie_environment.step(action)[:3]
                 next_action = self.epsilon_policy(epsilon, self.Q_S_A, next_state, self.zombie_environment)
+                #Apply sarsa state action update function
                 self.Q_S_A[state][action] += self.alpha * (reward + self.gamma * self.Q_S_A[next_state][next_action] -  self.Q_S_A[state][action])                    
-    
+                #update state action for the next step of episode    
                 state, action = next_state, next_action
-            
+                
+            #Get the value table after each episode
             self.value_function = np.max(self.Q_S_A, axis = 1)
             
             if self.target_values is not None:
@@ -58,7 +64,7 @@ class SARSA(LearningAlgorithm):
     
 
     def store_error(self, episode_number):
-    #calculate squared error
+        #calculate squared error
         self.errors[episode_number] = np.sqrt(np.mean( (self.value_function - self.target_values) ** 2 ))
         
 
