@@ -52,6 +52,11 @@ class SARSA(LearningAlgorithm):
                 #update state action for the next step of episode    
                 state, action = next_state, next_action
                 
+            # Every x episodes calculate the cumulative reward of the current policy
+            if episode % 100 == 0:
+                self.policy = np.argmax(self.Q_S_A, axis=1)
+                self.calc_policy_reward(episode_n = episode)
+                 
             #Get the value table after each episode
             self.value_function = np.max(self.Q_S_A, axis = 1)
             
