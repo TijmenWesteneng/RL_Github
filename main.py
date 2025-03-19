@@ -7,8 +7,7 @@ from monte_carlo_control import MonteCarloControl
 from TD0 import TD_Prediction
 # Create and test the environment
 #env = ZombieEscapeEnv(render_mode=None, fixed_seed = 35)
-env = ZombieEscapeEnv(render_mode=None, fixed_seed = 35, gamma=0.93)
-state, info = env.reset()
+env = ZombieEscapeEnv(render_mode=None, fixed_seed = 71, gamma=0.93)
 """
 # Reset environment and render
 state = env.reset()
@@ -40,19 +39,19 @@ policy_iteration = PolicyIteration(env, 0.00001)
 V, policy = policy_iteration.get_training_results()
 #policy_iteration.visualise_values()
 #policy_iteration.visualise_policy()
-""" mc_learning = MonteCarloPrediction(zombie_environment=env, policy=policy, episodes=10000, max_steps=100, target_values=V)
+mc_learning = MonteCarloPrediction(zombie_environment=env, policy=policy, episodes=100000, max_steps=100, target_values=V)
 V,policy = mc_learning.get_training_results()
-mc_learning.plot_error() """
+mc_learning.plot_error()
 """ mc_control = MonteCarloControl(zombie_environment=env, episodes=100000, max_steps=100, target_values=V)
 V,policy = mc_control.get_training_results()
 mc_control.visualise_values()
 mc_control.visualise_policy()
 mc_control.plot_error() """
-td_learning = TD_Prediction(zombie_environment=env, policy=policy, alpha=0.9, episodes=10000, target_values=V)
+""" td_learning = TD_Prediction(zombie_environment=env, policy=policy, alpha=0.9, episodes=10000, target_values=V)
 predicted_V, predicted_policy = td_learning.get_training_results()
 td_learning.visualise_values()
 #td_learning.visualise_policy()
-td_learning.plot_error()
+td_learning.plot_error() """
 
 # visualise_values(V)
 
@@ -70,12 +69,13 @@ td_learning.plot_error()
 # print(V)
 # print(new_value)
 
-# terminal = False
-# while not terminal:
-#     action = new_policy[env.s]
-#     #print(action)
-#     next_state, reward, terminal = env.step(action)[:3]
-#     env.render()
-#     state = next_state
-# env.close()
+""" terminal = False
+new_env = ZombieEscapeEnv(render_mode="human", fixed_seed = 71, gamma=0.93)
+while not terminal:
+    action = policy[new_env.get_current_state()]
+    next_state, reward, terminal = new_env.step(action)[:3]
+    new_env.render()
+
+new_env.close()
+env.close() """
 
