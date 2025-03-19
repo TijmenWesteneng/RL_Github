@@ -63,21 +63,5 @@ class SARSA(LearningAlgorithm):
 
     
 
-    def store_error(self, episode_number):
-        #calculate squared error
-        self.errors[episode_number] = np.sqrt(np.mean( (self.value_function - self.target_values) ** 2 ))
-        
-
-    def plot_error(self):
-
-        x = list(range(len(self.errors)))
-    
-        plt.plot(x, self.errors)
-        # Labels and title
-        plt.xlabel("episodes")
-        plt.ylabel("mean squared error")
-        #plt.legend()
-        plt.show()    
-     
         
             
