@@ -6,7 +6,7 @@ class LearningAlgorithm:
     """
     This class represents the base case for a learning algorithm. It contains methods shared by all algorithms such as getters and plotting.
     """
-    def __init__(self, zombie_environment:ZombieEscapeEnv):
+    def __init__(self, zombie_environment:ZombieEscapeEnv, episodes = None, target_values = None):
         #INITIALIZE CLASS VAR
         self.trained = False
         self.value_function = None
@@ -16,6 +16,11 @@ class LearningAlgorithm:
         self.number_of_actions = zombie_environment.action_space.n
         self.number_of_states = zombie_environment.observation_space.n
         self.gamma = self.zombie_environment.get_gamma()
+
+        # Target values and error array for RMSE calculations and plotting
+        if episodes is not None and target_values is not None:
+            self.target_values = target_values
+            self.errors = np.zeros(episodes)
 
         # Initialize list consisting of tuples of episode number and cumulative reward for that episode
         self.cum_reward_list = []
@@ -68,11 +73,14 @@ class LearningAlgorithm:
         ax.set_aspect('equal') # ensure that scaling of x and y is equal so the grid remains square
         plt.show()
 
-    def visualise_values(self, title='Value Function'):
+    def visualise_values(self, title='Value Function', value_function=None):
         """
         Plots the value matrix on an 8x8 grid.
         """
-        value_matrix = np.flip(self.value_function.reshape(8,8), axis=0) # Flip the rows so row 0 is at the bottom and row 7 is at the top to be in line with the pygame environment
+        if value_function is None:
+            value_function = self.value_function
+
+        value_matrix = np.flip(value_function.reshape(8,8), axis=0) # Flip the rows so row 0 is at the bottom and row 7 is at the top to be in line with the pygame environment
 
         fig, ax = plt.subplots(figsize=(8,8))
         ax.set_xlim(-0.5, 7.5)
@@ -92,11 +100,14 @@ class LearningAlgorithm:
         ax.set_aspect('equal') # ensure that scaling of x and y is equal so the grid remains square
         plt.show()
 
-    def visualise_values_heatmap(self, title='Value Function'):
+    def visualise_values_heatmap(self, title='Value Function', value_function=None):
         """
         Plot the value matrix on an 8x8 grid as a heatmap.
         """
-        value_matrix = np.flip(self.value_function.reshape(8,8), axis=0)
+        if value_function is None:
+            value_function = self.value_function
+
+        value_matrix = np.flip(value_function.reshape(8,8), axis=0)
         
         fig, ax = plt.subplots(figsize=(8,8))
         im = ax.imshow(value_matrix, origin='lower')
@@ -118,7 +129,27 @@ class LearningAlgorithm:
         ax.set_aspect('equal')
         plt.show()
 
+    def visualise_values_difference(self, values_comparison = None, abs = False, heatmap = False):
+        """
+        Visualise difference in value function matrices on an 8x8 grid.
+        Args:
+            values_comparison (np.array): The value function to compare the own value function to
+            abs (bool): If the difference should be represented as absolute values (empty: False)
+            heatmap (bool): If the difference should be plotted as a heatmap (empty: False)
+        """
+        if values_comparison is None:
+            assert self.target_values is not None, "visualise_values_difference: target_values must be set when no values_comparison is given"
+            values_comparison = self.target_values
 
+        subtraction_matrix = np.subtract(self.value_function, values_comparison)
+
+        if abs:
+            subtraction_matrix = np.abs(subtraction_matrix)
+
+        if heatmap:
+            self.visualise_values_heatmap(title="Value Function Difference", value_function=subtraction_matrix)
+        else:
+            self.visualise_values(title='Value Function Difference', value_function=subtraction_matrix)
 
     def calc_policy_reward(self, episode_n):
         """
@@ -137,18 +168,35 @@ class LearningAlgorithm:
             cum_reward += self.gamma ** state_n * reward
             state = next_state
 
-            # To prevent infinite loops, episodes max out at 10000 visited states
+            # To prevent infinite loops, episodes max out at 1000 visited states
             state_n += 1
-            if state_n > 10000:
+            if state_n > 1000:
                 cum_reward = -100
                 break
 
         self.cum_reward_list.append((episode_n, cum_reward))
 
-    def plot_cum_reward(self):
-        index, cum_reward_list = zip(*self.cum_reward_list)
-        plt.scatter(index, cum_reward_list)
-        plt.xlabel("Episode number")
-        plt.ylabel("Cumulative reward")
-        plt.title("Cumulative reward of policy over episodes")
+    def store_error(self, episode_number):
+        """Calculate Mean Squared Error and save to error array"""
+        self.errors[episode_number] = np.sqrt(np.mean((self.value_function - self.target_values) ** 2))
+
+    def plot_error(self):
+        """Plot Mean Squared Error over episodes"""
+        x = list(range(len(self.errors)))
+
+        plt.plot(x, self.errors)
+
+        # Labels and title
+        plt.xlabel("Episodes")
+        plt.ylabel("Root Mean Squared Error")
+
         plt.show()
+
+    def plot_cum_reward(self):
+        if len(self.cum_reward_list) > 0:
+            index, cum_reward_list = zip(*self.cum_reward_list)
+            plt.scatter(index, cum_reward_list)
+            plt.xlabel("Episode number")
+            plt.ylabel("Cumulative reward")
+            plt.title("Cumulative reward of policy over episodes")
+            plt.show()
