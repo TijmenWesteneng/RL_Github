@@ -1,6 +1,7 @@
 from monte_carlo_methods import MonteCarloLearning
 from ZombieEscapeEnv import ZombieEscapeEnv
 import numpy as np
+from tqdm import tqdm
 
 class MonteCarloControl(MonteCarloLearning):
 
@@ -31,7 +32,7 @@ class MonteCarloControl(MonteCarloLearning):
         """
 
 
-        for episode_number in range(self.episodes):
+        for episode_number in tqdm(range(self.episodes)):
             #Only generate complete episodes for monte carlo methods, avoid them being too long
             truncated = True
             while truncated:
@@ -59,5 +60,3 @@ class MonteCarloControl(MonteCarloLearning):
             
             if self.target_values is not None:
                 self.store_error(episode_number)
-
-            print(f"Episode: {episode_number}")
