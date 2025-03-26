@@ -57,6 +57,10 @@ class MonteCarloControl(MonteCarloLearning):
 
             self.value_function = np.max(self.state_action_value_function, axis=1)
             self.policy = np.argmax(self.state_action_value_function, axis=1)
+
+            # Every x episodes calculate the cumulative reward of the current policy
+            if episode_number % round(self.episodes / 1000) == 0:
+                self.calc_policy_reward(episode_n=episode_number)
             
             if self.target_values is not None:
                 self.store_error(episode_number)

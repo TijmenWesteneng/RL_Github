@@ -26,6 +26,9 @@ class LearningAlgorithm:
         # Initialize list consisting of tuples of episode number and cumulative reward for that episode
         self.cum_reward_list = []
 
+    def __repr__(self):
+        return type(self).__name__
+
     def run_training(self):
         pass
 
