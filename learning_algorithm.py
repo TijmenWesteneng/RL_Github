@@ -19,6 +19,7 @@ class LearningAlgorithm:
 
         # Target values and error array for RMSE calculations and plotting
         if episodes is not None and target_values is not None:
+            self.episodes = episodes
             self.target_values = target_values
             self.errors = np.zeros(episodes)
 
