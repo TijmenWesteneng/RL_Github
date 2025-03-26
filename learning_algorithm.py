@@ -159,7 +159,7 @@ class LearningAlgorithm:
         """
         cum_reward = 0
 
-        state = self.zombie_environment.reset()[0]
+        state = self.zombie_environment.reset()
         state_n = 0
         terminal = False
         while not terminal:
