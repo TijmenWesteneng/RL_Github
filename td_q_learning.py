@@ -44,7 +44,7 @@ class TDQLearning(LearningAlgorithm):
 
     def run_training(self):
         for episode in tqdm(range(self.episodes)):
-            state = self.zombie_environment.reset()[0]
+            state = self.zombie_environment.reset()
 
             terminated = False
             while not terminated:
@@ -109,7 +109,7 @@ f.close()
 
 # From here on we run the model and display it on the screen, so this is not for training
 test_env = ZombieEscapeEnv(render_mode='human', fixed_seed=24)
-state = test_env.reset()[0]
+state = test_env.reset()
 
 terminal = False
 while not terminal:

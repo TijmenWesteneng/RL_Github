@@ -19,11 +19,15 @@ class LearningAlgorithm:
 
         # Target values and error array for RMSE calculations and plotting
         if episodes is not None and target_values is not None:
+            self.episodes = episodes
             self.target_values = target_values
             self.errors = np.zeros(episodes)
 
         # Initialize list consisting of tuples of episode number and cumulative reward for that episode
         self.cum_reward_list = []
+
+    def __repr__(self):
+        return type(self).__name__
 
     def run_training(self):
         pass
@@ -158,7 +162,7 @@ class LearningAlgorithm:
         """
         cum_reward = 0
 
-        state = self.zombie_environment.reset()[0]
+        state = self.zombie_environment.reset()
         state_n = 0
         terminal = False
         while not terminal:

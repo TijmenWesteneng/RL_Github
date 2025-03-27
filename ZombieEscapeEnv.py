@@ -60,13 +60,13 @@ class ZombieEscapeEnv(gym.Env):
         nA = 4  # actions
         nS = nrow * ncol  # states
 
-        self.initial_state_distrib = np.array(self.r_map == "S").astype("float64").ravel()
-        self.initial_state_distrib /= self.initial_state_distrib.sum()
-
         # Create tuples inside the dictionary for each cell, to store information like this:
         # (transition probability, next state, reward, terminated)
         self.P = {s: {a: [] for a in range(nA)} for s in range(nS)}
 
+        self.s = 0
+        if self.render_mode == "human":
+            self._render_frame()
 
         # Change the position of the agent to an index
         def to_s(row, col):
@@ -178,14 +178,6 @@ class ZombieEscapeEnv(gym.Env):
         # truncation=False as the time limit is handled by the `TimeLimit` wrapper added during `make`
         return int(s), r, t, False, {"prob": p}
     
-    def fixed_step(self, a):
-        transitions = self.P[self.s][a]        
-        p, s, r, t = transitions[1]
-        self.s = s
-        self.lastaction = a
-
-        # truncation=False as the time limit is handled by the `TimeLimit` wrapper added during `make`
-        return int(s), r, t, False, {"prob": p}
     
     def _get_agent_location(self):
         #convert state to row, column
@@ -218,15 +210,13 @@ class ZombieEscapeEnv(gym.Env):
         letter = self.get_letter(state)
         return self.get_reward(letter)
 
+    def get_current_state(self):
+        return self.s
+    
     def reset(self, *, seed: Optional[int] = None, options: Optional[dict] = None, ):
-        super().reset(seed = seed if seed is not None else self.fixed_seed)
-        self.s = categorical_sample(self.initial_state_distrib, self.np_random)
-        self.lastaction = None
-
-        if self.render_mode == "human":
-            self._render_frame()
-
-        return int(self.s), {"prob": 1}
+        #super().reset(seed = seed if seed is not None else self.fixed_seed)
+        self.s = 0
+        return int(self.s)
 
         # Initialize the state
         # self.state = self.get_state()
