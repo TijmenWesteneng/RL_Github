@@ -6,13 +6,14 @@ import matplotlib.pyplot as plt
 
 
 class SARSA(LearningAlgorithm):
-    def __init__(self, zombie_environment:ZombieEscapeEnv, episodes = 1000, alpha = 0.1, target_values=None):
+    def __init__(self, zombie_environment:ZombieEscapeEnv, episodes = 1000, alpha = 0.1, target_values=None, decrease_rate=10):
         super().__init__(zombie_environment=zombie_environment)
         self.episodes = episodes
         self.alpha = alpha
         self.zombie_environment = zombie_environment
         self.target_values = target_values
         self.errors = np.zeros(self.episodes)
+        self.decrease_rate = decrease_rate
       
         #initial state, action values
         self.Q_S_A = np.zeros((self.number_of_states, self.number_of_actions))
@@ -38,8 +39,8 @@ class SARSA(LearningAlgorithm):
     def run_training(self):
         for episode in range(self.episodes):
             #restrat the environment after every episode
-            state, info = self.zombie_environment.reset()
-            epsilon =  1 / (1 + episode / 5000)#adjust epsilon to decay gradually                  
+            state = self.zombie_environment.reset()
+            epsilon =  np.exp(-self.decrease_rate/self.episodes*episode) #adjust epsilon to decay gradually                  
             action = self.epsilon_policy(epsilon, self.Q_S_A, state, self.zombie_environment)
             terminated = False
             
