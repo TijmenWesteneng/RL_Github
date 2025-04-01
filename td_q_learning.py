@@ -7,19 +7,20 @@ import matplotlib.pyplot as plt
 
 from ZombieEscapeEnv import ZombieEscapeEnv
 from value_iteration import ValueIteration
+from policy_iteration import PolicyIteration
 from learning_algorithm import LearningAlgorithm
 
 class TDQLearning(LearningAlgorithm):
     def __init__(self, zombie_environment: ZombieEscapeEnv,
-                 episodes = 100000, alpha = 0.05, epsilon_start = 0.9, epsilon_end = 0.1, target_values = None):
-        super().__init__(zombie_environment)
+                 episodes = 100000, alpha = 0.0025, epsilon_start = 0.8, target_values = None):
+        super().__init__(zombie_environment, episodes=episodes, target_values=target_values)
         self.zombie_environment = zombie_environment
         self.episodes = episodes
         self.gamma = zombie_environment.get_gamma()
         self.alpha = alpha
-        self.epsilon_start = epsilon_start
-        self.epsilon_end = epsilon_end
         self.epsilon = epsilon_start
+        self.epsilon_start = epsilon_start
+        self.epsilon_end = 0
 
         self.qsa = np.zeros((self.zombie_environment.observation_space.n, self.zombie_environment.action_space.n))
         self.policy = np.zeros(self.zombie_environment.observation_space.n)
@@ -37,10 +38,12 @@ class TDQLearning(LearningAlgorithm):
             action = np.argmax(Q_S_A[state])
         return action
 
-    def new_epsilon(self, episode_number):
-        """Calculate epsilon for certain episode number based on decreasing (liner) epsilon formula"""
+    def new_epsilon_alpha(self, episode_number):
+        """Calculate epsilon for certain episode number based on decreasing (linear) epsilon formula"""
         self.epsilon = max(self.epsilon_end,
                            self.epsilon_start - episode_number / self.episodes * (self.epsilon_start - self.epsilon_end))
+        #self.epsilon = 1 / (1 + episode_number / 10000)
+        #self.alpha = 1 / (1 + episode_number / 5000)
 
     def run_training(self):
         for episode in tqdm(range(self.episodes)):
@@ -69,7 +72,7 @@ class TDQLearning(LearningAlgorithm):
                 self.store_error(episode)
 
             # TODO: Better epsilon function, since it's currently under-performing a static epsilon
-            self.new_epsilon(episode)
+            self.new_epsilon_alpha(episode)
 
         # Calculate the final policy matrix and value matrix
         self.policy = np.argmax(self.qsa, axis=1)
